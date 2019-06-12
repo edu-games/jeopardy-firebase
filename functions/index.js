@@ -76,8 +76,18 @@ app.post('/addGame', async (req, res) => {
         })
         .then(res.status(200).send('success'))
         .catch(error => {
-            res.send('You suck!');
-            console.error('Error adding document: ', error);
+            res.send('Unable to add game');
+        });
+});
+app.delete('/deleteGame/:id', (req, res) => {
+    const { id } = req.params;
+
+    db.collection('games')
+        .doc(id)
+        .delete()
+        .then(res.status(204).send('Document successfully deleted!'))
+        .catch(error => {
+            res.send('Unable to delete game');
         });
 });
 app.post('/addQuestion', async (req, res) => {
