@@ -16,31 +16,6 @@ app.use(cors({ origin: true }));
 // Add middleware to authenticate requests
 // app.use(myMiddleware);
 
-app.get('/readMessages', async (req, res) => {
-    try {
-        // Grab the text parameter.
-        const { uid } = req.body;
-        let items = [];
-
-        const snapshot = await db
-            .collection('messages')
-            .where('author', '==', uid)
-            .get();
-
-        snapshot.docs.forEach(doc => {
-            items.push(doc.data());
-        });
-
-        if (snapshot.empty) {
-            res.status(200).send('No documents');
-        } else {
-            res.status(200).send(items);
-        }
-    } catch (err) {
-        res.status(500).send(err);
-    }
-});
-
 app.post('/getGames', async (req, res) => {
     try {
         // Grab the text parameter.
@@ -58,12 +33,13 @@ app.post('/getGames', async (req, res) => {
         });
 
         if (snapshot.empty) {
-            res.status(200).send('No documents');
+            res.send('No documents');
         } else {
-            res.status(200).send(items);
+            items = items.sort();
+            res.send(items);
         }
     } catch (err) {
-        res.status(500).send(err);
+        res.send('Unable to get games');
     }
 });
 app.post('/addGame', async (req, res) => {
@@ -74,7 +50,7 @@ app.post('/addGame', async (req, res) => {
             gameName: name,
             author: uid
         })
-        .then(res.status(200).send('success'))
+        .then(res.send('success'))
         .catch(error => {
             res.send('Unable to add game');
         });
@@ -85,7 +61,7 @@ app.delete('/deleteGame/:id', (req, res) => {
     db.collection('games')
         .doc(id)
         .delete()
-        .then(res.status(204).send('Document successfully deleted!'))
+        .then(res.send('Document successfully deleted!'))
         .catch(error => {
             res.send('Unable to delete game');
         });
@@ -100,25 +76,10 @@ app.post('/addQuestion', async (req, res) => {
             gameID: gameID,
             author: uid
         })
-        .then(res.status(200).send('success'))
+        .then(res.send('success'))
         .catch(error => {
-            res.send('You suck!');
-            console.error('Error adding document: ', error);
+            res.send('Unable to add question', error);
         });
 });
-// exports.addMessage = functions.https.onRequest(async (req, res) => {
-//     // Grab the text parameter.
-//     const { message, uid } = req.body;
-//     // Push the new message into the Realtime Database using the Firebase Admin SDK.
-//     const snapshot = await db
-//         .collection('messages')
-//         .doc(uuidv1())
-//         .set({ original: message, author: uid });
-//     // Redirect with 303 SEE OTHER to the URL of the pushed object in the Firebase console.
-//     res.set({ 'Access-Control-Allow-Origin': '*' })
-//         .status(200)
-//         .send('SUCCESS!');
-// });
 
-// });
 exports.jeopardy = functions.https.onRequest(app);
