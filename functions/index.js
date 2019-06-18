@@ -36,8 +36,8 @@ app.post('/getGames', async (req, res) => {
             items = items.sort();
             res.send(items);
         }
-    } catch (err) {
-        res.send('Unable to get games');
+    } catch (error) {
+        res.status(500).json({message:'get games fail', data:error});
     }
 });
 app.post('/addGame', async (req, res) => {
@@ -51,9 +51,9 @@ app.post('/addGame', async (req, res) => {
 
         const gameRef = await db.collection('games').add(data);
         const game = await gameRef.get();
-        res.json({ message: 'Game added successfully', data: game });
+        res.json({ message: 'add game success', data: game });
     } catch (error) {
-        res.status(500).send('Unable to add game', error);
+        res.status(500).json({message:'add game fail',data: error});
     }
 });
 app.delete('/deleteGame/:id', async (req, res) => {
@@ -86,43 +86,39 @@ app.delete('/deleteGame/:id', async (req, res) => {
                 .delete();
         }
 
-        res.status(204).json({ message: 'Game Delete Successfull' });
+        res.status(204).json({ message: 'game delete success' });
     } catch (error) {
-        res.status(500).send(error);
+        res.status(500).json({message:'game delete fail',data: error});
     }
 });
 app.post('/addQuestion', async (req, res) => {
-    console.log('/addQuestion');
-    const { question, answer, gameID, uid } = req.body;
+    try {
+        console.log('/addQuestion');
+        const { question, answer, gameID, uid } = req.body;
 
-    db.collection('questions')
-        .add({
+        db.collection('questions').add({
             question: question,
             answer: answer,
             gameID: gameID,
             author: uid
-        })
-
-        .then(
-            console.log('Question add successfull'),
-            res.send('Question add successfull')
-        )
-        .catch(error => {
-            console.log('Unable to add question'),
-                res.send('Unable to add question', error);
         });
+        res.status(200).json({ message: 'add question success' });
+    } catch (error) {
+        res.status(500).json({message:'add question fail',data: error});
+    }
 });
 app.delete('/deleteQuestion/', (req, res) => {
-    console.log('/deleteQuestion');
-    const { id } = req.body;
+    try{
+        console.log('/deleteQuestion');
+        const { id } = req.body;
+    
+        db.collection('questions')
+            .doc(id)
+            .delete()
 
-    db.collection('questions')
-        .doc(id)
-        .delete()
-        .then(res.send('Document successfully deleted!'))
-        .catch(error => {
-            res.send('Unable to delete game');
-        });
+            res.status(204).json({message:'question delete success'})
+    }catch(error){
+        res.status(500).json({message:'question delete fail', data: error});
 });
 
 exports.jeopardy = functions.https.onRequest(app);
