@@ -132,6 +132,12 @@ app.post('/addQuestion', async (req, res) => {
         res.status(500).json({ message: 'add question fail', data: error });
     }
 });
+
+/**
+ * Delete endpoint
+ * Accepts the question ID in the body
+ * {id: questionsID}
+ */
 app.delete('/deleteQuestion', async (req, res) => {
     try {
         console.log('/deleteQuestion');
