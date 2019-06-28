@@ -112,7 +112,7 @@ app.delete('/deleteGame/:id', async (req, res) => {
 app.post('/addQuestion', async (req, res) => {
     try {
         console.log('/addQuestion');
-        const { question, answer, gameID, uid, tags } = req.body;
+        const { question, answer, gameID, uid, tags, points } = req.body;
         let tagArray;
         if (tags) {
             tagArray = tags.split(',');
@@ -121,10 +121,11 @@ app.post('/addQuestion', async (req, res) => {
         }
 
         await db.collection('questions').add({
-            question: question,
-            answer: answer,
             gameID: gameID,
             author: uid,
+            question: question,
+            answer: answer,
+            points: points,
             tags: tagArray
         });
         res.status(200).json({ message: 'add question success' });
@@ -151,6 +152,31 @@ app.delete('/deleteQuestion', async (req, res) => {
         res.status(204).json({ message: 'question delete success' });
     } catch (error) {
         res.status(500).json({ message: 'question delete fail', data: error });
+    }
+});
+
+app.post('/filterQuestions', async (req, res) => {
+    const { uid, tags, points } = req.body;
+    try {
+        let result = [];
+        const pointsItem = await db
+            .collection('questions')
+            .where('points', '==', points)
+            .get();
+        result.push(pointsItem.data());
+
+        // for (let i = 0; i < tags.length; i++) {
+        //     const tagItem = db
+        //         .collection('questions')
+        //         .where('points', '==', points);
+        // }
+
+        res.status(200).json({
+            message: 'Filter questions successful',
+            data: pointsItem
+        });
+    } catch (error) {
+        res.status(500).json({ message: 'Filter questions failed' });
     }
 });
 
